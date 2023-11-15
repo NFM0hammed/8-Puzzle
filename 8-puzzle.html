@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>8-Puzzle</title>
+        <style>
+
+            @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Open+Sans:wght@300;500;700&family=Poppins:wght@100;200;300;400;500;700;800&family=Roboto:wght@100;300;500&family=Work+Sans:wght@200;300;400;500;600;700;800&display=swap');
+
+            body {
+                font-family: 'Poppins', sans-serif;
+            }
+            @media(max-width: 480px) {
+                body {
+                    width: 500px;
+                }
+            }
+
+            .win {
+                position: absolute;
+                background-color: #0096888c;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+            }
+            .win.active {
+                display: none;
+            }
+            .win .play-again {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+            }
+            .win .play-again h3 {
+                font-size: 40px;
+                color: yellow;
+            }
+            .win .play-again button {
+                background-color: #00a9ff;
+                color: #FFF;
+                font-size: 30px;
+                padding: 5px 15px;
+                border: none;
+                cursor: pointer;
+            }
+            .win .play-again button:hover {
+                background-color: #00aaff76;
+                transition: .3s;
+            }
+            .container {
+                width: 500px;
+                margin: 50px auto;
+                text-align: center;
+            }
+            h1 {
+                color: #00a9ff;
+            }
+            .eight-puzzle .board {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .eight-puzzle .board .cell {
+                font-weight: bold;
+                padding: 50px 0;
+                border-bottom: 3px solid;
+                border-right: 3px solid;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div class="win active">
+            <div class="play-again">
+                <h3>Congratulations, <br>You're win !</h3>
+                <button class="again">Play again</button>
+            </div>
+        </div>
+
+        <!-- 8-Puzzle -->
+        <div class="container">
+            <h1>8-Puzzle Game</h1>
+            <div class="eight-puzzle">
+                <div class="board">
+                    <div class="cell">1</div>
+                    <div class="cell">2</div>
+                    <div class="cell">3</div>
+                    <div class="cell">4</div>
+                    <div class="cell">5</div>
+                    <div class="cell">6</div>
+                    <div class="cell"></div>
+                    <div class="cell">7</div>
+                    <div class="cell">8</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            // Get cells from DOM
+            let cells = document.querySelectorAll(".board .cell");
+
+            // Array for check win
+            let win = [1, 2, 3, 4, 5, 6, 7, 8];
+
+            // Cells array to move
+            let cellsArray = [[1, 2, 3], [4, 5, 6], [, 7, 8]];
+
+            // Init variable to check win
+            let result = 0;
+
+            // To press any cell
+            cells.forEach((cell) => {
+                cell.addEventListener("click", (e) => {
+                    // If cell isn't a tile
+                    if(e.target.textContent != '') {
+                        moveCell(e.target);
+                        checkWin();
+                        // All cells in DOM are equal all cells in win array
+                        if(result == 8) {
+                            document.querySelector(".win").classList.remove("active");
+                        }
+                        result = 0;
+                    }
+                });
+            });
+
+            // Function to add new cells in DOM
+            function newCells(index_i, index_j) {
+                // To add the new cell in the tile
+                for(let i = 0; i < cells.length; i++) {
+                    if(cells[i].textContent == '') {
+                        cells[i].textContent = cellsArray[index_i][index_j];
+                    }
+                }
+
+                // To add tile in the old cell
+                for(let i = 0; i < cellsArray.length; i++) {
+                    for(let j = 0; j < cellsArray.length; j++) {
+                        if(i == index_i && j == index_j) {
+                            if(i > 1) {
+                                cells[(i + j) + i + 2].textContent = null;
+                            } else if(i == 1) {
+                                cells[(i + j) + 2].textContent = null;
+                            } else {
+                                cells[(i + j) + i].textContent = null;
+                            }
+                        }
+                    }
+                }
+
+                colorCells();
+            }
+
+            // Function color cells
+            function colorCells() {
+                // Add color to all cells
+                for(let i = 0; i < cells.length; i++) {
+                        cells[i].style.backgroundColor = "#009688";
+                        cells[i].style.color = "#FFF";
+                    }
+
+                // Add different color to the tile
+                for(let i = 0; i < cells.length; i++) {
+                    if(cells[i].textContent == '') {
+                        cells[i].style.backgroundColor = "#F1F1F1";  
+                    }
+                }
+            }
+
+            colorCells();
+
+            // Function to move cell
+            function moveCell(e) {
+                for(let i = 0; i < cellsArray.length; i++) {
+                    for(let j = 0; j < cellsArray.length; j++) {
+                        if(e.textContent == cellsArray[i][j]) {
+                            // Move up
+                            if(i > 0 && cellsArray[i - 1][j] == null) {
+                                newCells(i, j);
+                                cellsArray[i - 1][j] = cellsArray[i][j];
+                                cellsArray[i][j] = null;
+                            }
+                            // Move down
+                            else if(i < 2 && cellsArray[i + 1][j] == null) {
+                                newCells(i, j);
+                                cellsArray[i + 1][j] = cellsArray[i][j];
+                                cellsArray[i][j] = null;
+                            }
+                            // Move right
+                            else if(j < 2 && cellsArray[i][j + 1] == null) {
+                                newCells(i, j);
+                                cellsArray[i][j + 1] = cellsArray[i][j];
+                                cellsArray[i][j] = null;
+                            }
+                            // Move left
+                           else if(j > 0 && cellsArray[i][j - 1] == null) { 
+                                newCells(i, j);
+                                cellsArray[i][j - 1] = cellsArray[i][j];
+                                cellsArray[i][j] = null;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Function to check win
+            function checkWin() {
+                win.forEach((ele, index) => {
+                    // cell on [win array] equal cell on DOM
+                    if(ele == cells[index].textContent) {
+                        result++;
+                    }
+                });
+
+            }
+
+            // Reload page on click button after win
+            document.querySelector("button").onclick = function() {
+                location.reload();
+            }
+
+        </script>
+    </body>
+</html>
